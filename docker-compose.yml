@@ -1,0 +1,89 @@
+# ============================================================
+# 师承智导 - 阿里云 ECS Docker Compose 部署配置
+# 用法: docker compose up -d --build
+# ============================================================
+services:
+  # ---- MySQL 数据库 ----
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-cryd2026}
+      MYSQL_DATABASE: cryd
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - cryd-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_PASSWORD:-cryd2026}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ---- 讯飞星火 Embedding 代理（Node.js，为后端签名转发到讯飞）----
+  spark-embedding:
+    build:
+      context: .
+      dockerfile: spark-server.Dockerfile
+    container_name: spark-embedding
+    restart: always
+    env_file:
+      - .env
+    networks:
+      - cryd-net
+
+  # ---- 后端 Spring Boot ----
+  backend:
+    build:
+      context: ./后端
+      dockerfile: Dockerfile
+    container_name: backend
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+      spark-embedding:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      - JAVA_OPTS=-Xmx768m -Xms256m -XX:+UseG1GC
+      - SPRING_PROFILES_ACTIVE=prod
+      # Docker 网络内用服务名访问 spark 代理（覆盖 .env 中的本地 127.0.0.1）
+      - SPARK_EMBEDDING_URL=http://spark-embedding:9876/embed
+    volumes:
+      - ./data/resources:/app/data/resources
+      - ./data/audio:/app/data/audio
+      - ./data/knowledge-base:/app/data/knowledge-base
+      - ./data/ppt-cache:/app/data/ppt-cache
+      - ./data/reference.wav:/app/data/reference.wav:ro
+      - ./data/reference.wav:/app/frontend/public/voice/reference.wav:ro
+      - ./data/tts-cache:/app/data/tts-cache
+    networks:
+      - cryd-net
+
+  # ---- 前端 Nginx ----
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - cryd-net
+
+volumes:
+  mysql_data:
+
+networks:
+  cryd-net:
+    driver: bridge

@@ -1,0 +1,139 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: 师承智导
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/cryd?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:}
+    hikari:
+      maximum-pool-size: 30
+      minimum-idle: 5
+      connection-timeout: 5000
+      idle-timeout: 300000
+      max-lifetime: 600000
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_size: 20
+          order_inserts: true
+          order_updates: true
+
+# LLM config (env vars, see .env.example)
+llm:
+  api:
+    url: ${LLM_API_URL:https://api.deepseek.com/v1/chat/completions}
+    key: ${LLM_API_KEY:}
+    model: ${LLM_API_MODEL:deepseek-chat}
+    model-pro: deepseek-v4-pro
+
+# 讯飞语音听写 — 密钥通过环境变量注入，禁止硬编码到代码库
+xfyun:
+  appid: ${XFYUN_APPID:}
+  api-key: ${XFYUN_API_KEY:}
+  api-secret: ${XFYUN_API_SECRET:}
+
+# Multi-agent config
+agent:
+  pipeline:
+    max-retries: 3
+    task-timeout-ms: 120000
+    review-enabled: true
+    review-threshold: 0.6
+  profile-analyst:
+    name: Profile Analyst
+    description: Analyze student profile via chat
+  knowledge-manager:
+    name: Knowledge Manager
+    description: Manage course knowledge base
+  course-designer:
+    name: Course Designer
+    description: Generate personalized docs and mindmaps
+  question-expert:
+    name: Question Expert
+    description: Generate practice questions
+  path-planner:
+    name: Path Planner
+    description: Plan personalized learning path
+  tutor:
+    name: AI Tutor
+    description: Answer questions and provide tutoring
+
+# RAG config
+rag:
+  enabled: true
+  chunk-size: 512
+  chunk-overlap: 64
+  top-k: 5
+  similarity-threshold: 0.3
+  vector-store: in-memory
+  embedding:
+    provider: ${RAG_EMBEDDING_PROVIDER:spark}  # 可选: local / openai / zhipu / spark（默认讯飞，失败自动回退本地哈希）
+    dimension: 1024
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
+      model: ${OPENAI_EMBEDDING_MODEL:text-embedding-3-small}
+    zhipu:
+      api-key: ${ZHIPU_API_KEY:}
+      base-url: ${ZHIPU_BASE_URL:https://open.bigmodel.cn/api/paas/v4}
+      model: ${ZHIPU_EMBEDDING_MODEL:embedding-2}
+    spark:
+      # Java 不直连讯飞，而是调用本地 spark-server.js 代理（由代理生成签名转发到讯飞）
+      # 同机部署填 http://127.0.0.1:9876/embed；分机部署填 Node 服务的内网地址
+      url: ${SPARK_EMBEDDING_URL:http://127.0.0.1:9876/embed}
+      app-id: ${SPARK_APP_ID:}
+      api-key: ${SPARK_API_KEY:}
+      api-secret: ${SPARK_API_SECRET:}
+      model: embedding-v1
+  hallucination:
+    enabled: true
+    fact-check-enabled: true
+    # 幻觉率阈值（百分比，0-100）：超过此值触发自动重生成。
+    # AI学习场景建议 25-35%；教学解答对事实敏感，过高会误导学生，过低则频繁重试影响体验。
+    threshold: 30.0
+    # 自动重生成次数（已禁用：设为0跳过回退重生成，保留幻觉检测但不自动重试）
+    max-retries: 0
+  knowledge-import:
+    enabled: false
+    base-path: ${KNOWLEDGE_BASE_PATH:F:/最新/data/knowledge-base}
+    force-reimport: false
+
+# MiMo TTS config
+mimo:
+  tts:
+    api-key: ${MIMO_TTS_API_KEY:}
+    base-url: ${MIMO_TTS_BASE_URL:https://api.xiaomimimo.com/v1}
+    model: ${MIMO_TTS_MODEL:mimo-v2.5-tts-voiceclone}
+    reference-voice-path: ${TTS_REFERENCE_VOICE_PATH:}
+
+# System config
+system:
+  storage:
+    resources-path: ${STORAGE_RESOURCES_PATH:../data/resources}
+    audio-chapters-path: ${STORAGE_AUDIO_CHAPTERS_PATH:../data/audio/chapters}
+  resource:
+    max-batch-generation: 10
+    max-generation-per-day: 50
+  evaluation:
+    max-questions-per-test: 20
+    default-time-minutes: 45
+  learning-path:
+    max-steps: 10
+    suggest-daily: true

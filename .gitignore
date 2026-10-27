@@ -1,0 +1,72 @@
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# IntelliJ
+*.iml
+*.iws
+*.ipr
+.idea/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Generated files
+.classpath
+.project
+.settings/
+
+# Node
+node_modules/
+package-lock.json
+
+# Claude Code
+.claude/
+claude
+
+# Frontend build
+frontend/dist/
+
+# Runtime data
+data/
+后端/data/
+
+# Temp working files
+AI驱动成果描述.md
+ClaudeCode_BUG修复清单.md
+ClaudeCode_资源与学习路径.md
+重构设计文档_v2.md
+
+# Environment secrets
+.env
+
+# Static assets (auto-generated from frontend build)
+后端/src/main/resources/static/assets/
+
+# Temporary files
+*.swp
+*~
+
+# Environment secrets (all variants)
+.env.*
+!.env.example

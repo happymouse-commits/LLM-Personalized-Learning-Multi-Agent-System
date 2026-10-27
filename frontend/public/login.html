@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>师承智导 - 个性化多智能体学习平台</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+            --dark-gradient: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            --primary-light: #eff6ff;
+            --text-dark: #1a1a1a;
+            --text-muted: #666666;
+            --bg-light: #f8fafc;
+            --shadow-sm: 0 4px 20px rgba(0,0,0,0.02);
+            --shadow-md: 0 10px 30px rgba(0,0,0,0.04);
+            --shadow-lg: 0 20px 40px rgba(59,130,246,0.08);
+            --radius: 16px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        body { color: var(--text-dark); background-color: #f0f4f8; overflow-x: hidden; scroll-behavior: smooth; }
+        a { text-decoration: none; color: inherit; transition: all 0.25s ease; }
+        ul { list-style: none; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+        .btn { display: inline-block; padding: 14px 32px; border-radius: 30px; font-weight: 600; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-align: center; font-size: 15px; border: none; }
+        .btn-primary { background: var(--primary-gradient); color: white; box-shadow: 0 4px 15px rgba(230,95,43,0.2); }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(230,95,43,0.35); }
+        .btn-outline { background: white; color: var(--primary); border: 2px solid var(--primary); }
+        .btn-outline:hover { background: var(--primary-light); transform: translateY(-3px); }
+        .section-header { text-align: center; margin-bottom: 60px; }
+        .section-title { font-size: 36px; font-weight: 800; margin-bottom: 16px; letter-spacing: -0.5px; }
+        .section-title span { color: var(--primary); }
+        .section-subtitle { color: var(--text-muted); font-size: 16px; max-width: 600px; margin: 0 auto; line-height: 1.6; }
+
+        /* Header */
+        header { background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 1px solid rgba(0,0,0,0.04); }
+        .header-inner { display: flex; justify-content: space-between; align-items: center; height: 76px; }
+        .logo { font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 8px; color: #111; }
+        .logo-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; display: inline-block; }
+        .nav-links { display: flex; gap: 36px; font-size: 15px; }
+        .nav-links a { color: #444; font-weight: 500; }
+        .nav-links a:hover, .nav-links a.active { color: var(--primary); font-weight: 600; }
+        .header-auth { display: flex; gap: 20px; align-items: center; }
+        .btn-login { color: var(--text-muted); font-size: 15px; font-weight: 500; cursor: pointer; background: none; border: none; font-family: inherit; }
+        .btn-login:hover { color: var(--primary); }
+
+        /* Hero */
+        .hero { padding: 170px 0 100px; background: linear-gradient(180deg, #e0e7ff 0%, #eef2ff 50%, #f0f4f8 100%); }
+        .hero-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 40px; align-items: center; }
+        .hero-badge { display: inline-flex; align-items: center; background: rgba(236,95,43,0.08); color: var(--primary); padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 24px; }
+        .hero h1 { font-size: 52px; line-height: 1.25; margin-bottom: 24px; font-weight: 800; color: #111; }
+        .hero h1 span { background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 18px; color: #555; margin-bottom: 35px; line-height: 1.7; }
+        .hero-btns { display: flex; gap: 16px; margin-bottom: 45px; }
+        .hero-stats { display: flex; gap: 40px; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 30px; }
+        .hero-stat-item { font-size: 14px; color: var(--text-muted); }
+        .hero-stat-item strong { display: block; font-size: 24px; color: #111; margin-bottom: 4px; font-weight: 700; }
+        .hero-mockup { position: relative; }
+        .hero-mockup::after { content: ''; position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); width: 120%; height: 120px; pointer-events: none; z-index: -1; }
+        .mockup-browser { background: #fff; border-radius: 14px; box-shadow: 0 25px 60px rgba(0,0,0,0.12), 0 8px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; overflow: hidden; transform: scale(1); transform-origin: center center; transition: transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94); }
+        .mockup-browser:hover { transform: scale(1.02); }
+        .mockup-screenshot { width: 100%; display: block; }
+
+        /* Services */
+        .services { padding: 100px 0; background: #f0f4f8; }
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
+        .service-card { background: #ffffff; padding: 40px 30px; border-radius: var(--radius); border: 1px solid #e2e8f0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
+        .service-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); border-color: transparent; background: white; }
+        .service-card::after { content: ''; position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); width: 80%; height: 60px; background: radial-gradient(ellipse at center, rgba(230,95,43,0.10) 0%, transparent 70%); pointer-events: none; opacity: 0; transition: opacity 0.3s; }
+        .service-card:hover::after { opacity: 1; }
+        .service-icon { width: 48px; height: 48px; background: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; font-size: 22px; box-shadow: var(--shadow-sm); }
+        .service-card h3 { font-size: 20px; margin-bottom: 12px; font-weight: 700; }
+        .service-card p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+        /* Agent Hub */
+        .agent-hub { padding: 100px 0; background: #e8f0fe; }
+        .hub-layout { display: grid; grid-template-columns: 1fr 1.2fr; gap: 60px; align-items: center; }
+        .hub-left h2 { font-size: 38px; font-weight: 800; margin-bottom: 20px; line-height: 1.3; }
+        .hub-left p { color: var(--text-muted); margin-bottom: 35px; line-height: 1.7; font-size: 16px; }
+        .hub-container { position: relative; height: 460px; display: flex; align-items: center; justify-content: center; }
+        .core-hub { width: 110px; height: 110px; background: var(--primary-gradient); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; z-index: 5; box-shadow: 0 10px 30px rgba(230,95,43,0.3); }
+        .hub-node { position: absolute; background: #ffffff; border-radius: 30px; padding: 12px 24px; box-shadow: var(--shadow-md); border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; transition: all 0.3s ease; }
+        .hub-node:hover { transform: scale(1.05); box-shadow: var(--shadow-lg); }
+        .h-node1 { top: 8%; left: 8%; } .h-node2 { top: 5%; right: 8%; }
+        .h-node3 { top: 46%; left: -5%; } .h-node4 { top: 44%; right: -5%; }
+        .h-node5 { bottom: 8%; left: 10%; } .h-node6 { bottom: 5%; right: 10%; }
+
+        /* Functions */
+        .functions { padding: 100px 0; background: #f0f4f8; }
+        .functions-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        @media (max-width: 1024px) { .functions-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); } }
+        .func-card { background: #ffffff; border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-md); border: 1px solid #e2e8f0; transition: all 0.3s; position: relative; }
+        .func-card:hover { transform: translateY(-4px); }
+        .func-card::after { content: ''; position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); width: 70%; height: 50px; background: radial-gradient(ellipse at center, rgba(230,95,43,0.10) 0%, transparent 70%); pointer-events: none; opacity: 0; transition: opacity 0.3s; }
+        .func-card:hover::after { opacity: 1; }
+        .func-card h3 { font-size: 16px; margin-bottom: 8px; padding-bottom: 10px; border-bottom: 1px solid #eee; font-weight: 700; }
+        .func-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4; }
+        .func-mock-img { background: #f8fafc; height: 200px; border-radius: 10px; border: 1px solid #e2e8f0; overflow: hidden; }
+        .func-mock-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        /* Metrics */
+        .metrics { padding: 60px 0; background: linear-gradient(180deg, #e8f0fe 0%, #f0f4f8 100%); border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; }
+        .metrics-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 24px; text-align: center; }
+        @media (max-width: 768px) { .metrics-grid { grid-template-columns: repeat(3, 1fr); } }
+        .metric-item h4 { font-size: 38px; font-weight: 800; color: var(--primary); margin-bottom: 6px; }
+        .metric-item p { font-size: 14px; color: var(--text-muted); font-weight: 500; }
+
+        /* Timeline */
+        .timeline { padding: 100px 0; background: #f0f4f8; }
+        .timeline-container { display: flex; flex-direction: column; gap: 30px; margin-top: 50px; }
+        .timeline-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+        @media (max-width: 900px) { .timeline-row { grid-template-columns: repeat(2, 1fr); } }
+        .time-step { background: #ffffff; padding: 28px 24px; border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid #e2e8f0; position: relative; transition: all 0.3s; }
+        .time-step:hover { transform: translateY(-4px); }
+        .time-step::after { content: ''; position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); width: 70%; height: 50px; background: radial-gradient(ellipse at center, rgba(230,95,43,0.10) 0%, transparent 70%); pointer-events: none; opacity: 0; transition: opacity 0.3s; }
+        .time-step:hover::after { opacity: 1; }
+        .time-badge { position: absolute; top: -16px; left: 24px; width: 32px; height: 32px; background: var(--primary-gradient); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; border: 3px solid white; box-shadow: 0 4px 10px rgba(230,95,43,0.2); }
+        .time-step h4 { font-size: 16px; margin: 10px 0 8px 0; font-weight: 700; }
+        .time-step p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+        /* Bottom Banner */
+        .bottom-banner { padding: 80px 0; background: linear-gradient(180deg, #f0f4f8 0%, #e0e7ff 100%); }
+        .banner-card { background: var(--dark-gradient); color: white; border-radius: 28px; padding: 75px 40px; text-align: center; position: relative; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.15); }
+        .banner-card h2 { font-size: 40px; margin-bottom: 16px; font-weight: 800; color: white; }
+        .banner-card p { font-size: 18px; color: #a0a0a5; margin-bottom: 40px; max-width: 720px; margin-left: auto; margin-right: auto; white-space: nowrap; }
+        .banner-btns { display: flex; gap: 20px; justify-content: center; }
+
+        /* Footer */
+        footer { background: #0d0d0f; color: #808085; padding: 80px 0 30px; font-size: 14px; border-top: 1px solid #1c1c21; }
+        .footer-grid { display: grid; grid-template-columns: 2fr repeat(3, 1fr); gap: 50px; margin-bottom: 60px; }
+        @media (max-width: 768px) { .footer-grid { grid-template-columns: 1fr; gap: 30px; } }
+        .footer-logo { color: white; font-size: 19px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+        .footer-col h4 { color: white; margin-bottom: 22px; font-size: 15px; font-weight: 600; }
+        .footer-col ul li { margin-bottom: 12px; color: #808085; }
+        .footer-col a:hover { color: var(--primary); }
+        .footer-bottom { border-top: 1px solid #1c1c21; padding-top: 25px; text-align: center; font-size: 13px; color: #505055; }
+
+        /* ===== 词云区域（与Home.vue一致） ===== */
+        .wordcloud-section {
+            padding: 80px 24px;
+            background: #f8fafc;
+        }
+        .wordcloud-container { max-width: 1200px; margin: 0 auto; text-align: center; }
+        .wordcloud-title { font-size: 32px; font-weight: 800; color: #1a1a2e; margin-bottom: 12px; }
+        .wordcloud-subtitle { font-size: 16px; color: #666; margin-bottom: 32px; }
+        .wordcloud-wrapper {
+            position: relative;
+            width: 100%;
+            height: 520px;
+            background: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .wordcloud-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        /* 悬停卡片（与Home.vue一致） */
+        .knowledge-card {
+            position: fixed;
+            background: #fff;
+            border-radius: 10px;
+            padding: 12px 16px;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(6px);
+            transition: opacity 0.15s ease, transform 0.15s ease;
+        }
+        .knowledge-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .card-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .card-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .card-desc {
+            font-size: 12px;
+            color: #64748b;
+            line-height: 1.5;
+            margin-bottom: 6px;
+        }
+        .card-tag {
+            font-size: 10px;
+            color: #6366f1;
+            background: #eef2ff;
+            padding: 2px 8px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        /* ===== 登录弹窗 ===== */
+        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 2000; display: none; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); }
+        .modal-content { position: relative; width: 100%; max-width: 420px; background: #fff; border-radius: 20px; padding: 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: modalIn 0.3s ease; z-index: 1; }
+        @keyframes modalIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .modal-close { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; background: #f1f5f9; border: none; border-radius: 8px; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .modal-close:hover { background: #e2e8f0; color: #334155; }
+        .modal-tabs { display: flex; gap: 4px; margin-bottom: 24px; background: #f1f5f9; border-radius: 12px; padding: 4px; }
+        .tab-btn { flex: 1; padding: 10px; background: transparent; border: none; color: #64748b; font-size: 15px; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+        .tab-btn.active { background: #fff; color: #1e293b; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .auth-form { display: none; }
+        .auth-form.active { display: block; }
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 6px; }
+        .form-input { width: 100%; padding: 12px 14px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; color: #1e293b; font-size: 15px; transition: all 0.2s; font-family: inherit; }
+        .form-input::placeholder { color: #94a3b8; }
+        .form-input:focus { outline: none; border-color: #e65f2b; background: #fff; box-shadow: 0 0 0 3px rgba(230,95,43,0.1); }
+        .btn-full { width: 100%; padding: 13px; font-size: 15px; }
+        .error-message { color: #ef4444; font-size: 13px; margin-top: 8px; display: none; }
+        .error-message.show { display: block; }
+        .demo-btn { width: 100%; margin-top: 10px; padding: 11px; background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px; color: #16a34a; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+        .demo-btn:hover { background: #dcfce7; border-color: #86efac; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="container header-inner">
+            <div class="logo"><div class="logo-dot"></div> 师承智导</div>
+            <ul class="nav-links">
+                <li><a href="#" class="active">首页</a></li>
+                <li><a href="#features">功能特色</a></li>
+                <li><a href="#agents">智能体架构</a></li>
+                <li><a href="#knowledge">知识图谱</a></li>
+                <li><a href="#workflow">科学流程</a></li>
+            </ul>
+            <div class="header-auth">
+                <a href="#" class="btn btn-primary" style="padding: 10px 24px; font-size: 14px;" onclick="openModal(); return false;">立即开始</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-grid">
+            <div class="hero-left">
+                <div class="hero-badge">⚡ AI多智能体协同 · 自适应体系</div>
+                <h1>每位学生都有<br>属于自己的<br><span>C 语言</span>学习路线</h1>
+                <p>从全方位自适应学习能力评估到资源柔性生成，依托前沿多大模型 Agent 架构，让技术因你闪烁，打造沉浸式心流学习体验。</p>
+                <div class="hero-btns">
+                    <a href="#" class="btn btn-primary" onclick="openModal(); return false;">立即开始学习</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat-item"><strong>36</strong> 知识节点覆盖</div>
+                    <div class="hero-stat-item"><strong>6 大</strong> 数字智能体协作</div>
+                    <div class="hero-stat-item"><strong>8 维</strong> 深度学习画像</div>
+                </div>
+            </div>
+            <div class="hero-right">
+                <div class="hero-mockup">
+                    <div class="mockup-browser">
+                        <img src="/dashboard-screenshot.png" alt="师承智导学习控制台" class="mockup-screenshot">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">AI 如何为你重塑个性化学习？</h2>
+                <div class="section-subtitle">基于多阶段协同网络，全方位改造知识消化与技能精进流程</div>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon" style="color:#e65f2b;">🧭</div>
+                    <h3>AI 导学</h3>
+                    <p>深刻洞察你的学习基础、习惯与偏好，提供针对性的方向启发、全天候破冰答疑与心理激励。</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon" style="color:#3b82f6;">📐</div>
+                    <h3>学习画像构建</h3>
+                    <p>生成 8 维能力定量评估模型，多向发掘隐蔽的知识死角，精准锚定后续的强化航线。</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon" style="color:#10b981;">⛓️</div>
+                    <h3>多智能体协作</h3>
+                    <p>6 大专属数字智能体秒级纵向连通，将原本复杂的编程学习任务高度有序地拆解并分布式编排。</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon" style="color:#8b5cf6;">🔍</div>
+                    <h3>RAG 知识检索</h3>
+                    <p>通过专有 C 语言工程案例与教材知识库深度映射，保障每一条算法与底层原理解答的专业度与可靠性。</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon" style="color:#ec4899;">💡</div>
+                    <h3>个性化资源生成</h3>
+                    <p>根据当前薄弱项，实时按需柔性拼装并动态输出测试习题、保姆级图文讲义及企业级工程实战任务。</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon" style="color:#f59e0b;">🔄</div>
+                    <h3>动态优化调整</h3>
+                    <p>实时捕获编码编译表现，自适应回溯微调后续教学坡度与内容深度，保障学习状态长久处于高效"心流区"。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Agents Hub Section -->
+    <section class="agent-hub" id="agents">
+        <div class="container hub-layout">
+            <div class="hub-left">
+                <span style="color:var(--primary); font-weight:700; font-size:14px; letter-spacing: 1px; uppercase">架构核心</span>
+                <h2 style="margin-top:10px;">6 大智能体分布式协同<br>量身定制最优解</h2>
+                <p>打破传统单一AI的局限，采用多智能体分布式协作网络。每个专家级 Agent 各司其职、无缝联动，共同为你提供卓越、流畅的沉浸式个人专属学习体验。</p>
+            </div>
+            <div class="hub-container">
+                <div class="core-hub">👤 学习者</div>
+                <div class="hub-node h-node1">🤖 AI导学 Agent</div>
+                <div class="hub-node h-node2">📋 学习规划 Agent</div>
+                <div class="hub-node h-node3">🔍 知识检索 Agent</div>
+                <div class="hub-node h-node4">🪄 资源生成 Agent</div>
+                <div class="hub-node h-node5">📝 反馈优化 Agent</div>
+                <div class="hub-node h-node6">🎯 能力评估 Agent</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 知识图谱词云区域 -->
+    <section class="wordcloud-section" id="knowledge">
+        <div class="wordcloud-container">
+            <h2 class="wordcloud-title">核心演进空间：C语言立体化智能学习路径</h2>
+            <p class="wordcloud-subtitle">移动鼠标悬停在各子知识点上，查看自适应生成的资源详情</p>
+            <div class="wordcloud-wrapper" id="wordcloudWrapper">
+                <canvas id="wordcloudCanvas" class="wordcloud-canvas"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- 悬停卡片 -->
+    <div class="knowledge-card" id="knowledgeCard">
+        <div class="card-header">
+            <div class="card-icon" id="cardIcon">📖</div>
+            <div class="card-name" id="cardName"></div>
+        </div>
+        <p class="card-desc" id="cardDesc"></p>
+        <span class="card-tag" id="cardTag"></span>
+    </div>
+
+    <!-- Function Preview -->
+    <section class="functions">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">开箱即用的深度学习工作台</h2>
+                <div class="section-subtitle">直观、纯粹的交互界面，满足从零基础到系统级开发的全周期需求</div>
+            </div>
+            <div class="functions-grid">
+                <div class="func-card"><h3>AI 导学</h3><p>智能对话，个性化陪伴式引导与多模态答疑。</p><div class="func-mock-img"><img src="/feat-ai-guide.png" alt="AI导学"></div></div>
+                <div class="func-card"><h3>学习路径</h3><p>可视化动态图谱，清晰掌握每一阶段技能树进度。</p><div class="func-mock-img"><img src="/feat-learning-path.png" alt="学习路径"></div></div>
+                <div class="func-card"><h3>资源中心</h3><p>AI 自动生成个性化学习资源，知识精讲、代码实战一应俱全。</p><div class="func-mock-img"><img src="/feat-resources.png" alt="资源中心" style="width:100%;height:100%;object-fit:cover;border-radius:8px;"></div></div>
+                <div class="func-card"><h3>刷题练习</h3><p>WebIDE 智能组卷，高频错题自适应二次巩固。</p><div class="func-mock-img"><img src="/feat-practice.png" alt="刷题练习"></div></div>
+                <div class="func-card"><h3>能力评估</h3><p>多维量化评估，雷达图精准透视技术长短板。</p><div class="func-mock-img"><img src="/feat-assessment.png" alt="能力评估"></div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Metrics -->
+    <section class="metrics">
+        <div class="container metrics-grid">
+            <div class="metric-item"><h4>8 维</h4><p>学习画像维度</p></div>
+            <div class="metric-item"><h4>6 个</h4><p>智能体协同</p></div>
+            <div class="metric-item"><h4>100+</h4><p>知识点深度覆盖</p></div>
+            <div class="metric-item"><h4>500+</h4><p>高频实验题库</p></div>
+            <div class="metric-item"><h4>95%</h4><p>自适应推荐准确率</p></div>
+            <div class="metric-item"><h4>1000+</h4><p>在学同路人</p></div>
+        </div>
+    </section>
+
+    <!-- Timeline -->
+    <section class="timeline" id="workflow">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">科学的学习流程，让进步<span>清晰可见</span></h2>
+                <div class="section-subtitle">环环相扣的自适应闭环，用严谨的数据与路径见证你的破茧成蝶</div>
+            </div>
+            <div class="timeline-container">
+                <div class="timeline-row">
+                    <div class="time-step"><div class="time-badge">01</div><h4>新用户注册</h4><p>创建专属账号，智能录入初始技术偏好与技术背景。</p></div>
+                    <div class="time-step"><div class="time-badge">02</div><h4>AI 导学破冰</h4><p>多模态对话摸底，语音或文字均可，快速定位学习起点。</p></div>
+                    <div class="time-step"><div class="time-badge">03</div><h4>多维画像构建</h4><p>8 维能力画像动态生成，精准锚定知识盲区与强化方向。</p></div>
+                    <div class="time-step"><div class="time-badge">04</div><h4>自适应路线规划</h4><p>结合薄弱点与学习节奏，生成专属个性化学习路径。</p></div>
+                </div>
+                <div class="timeline-row">
+                    <div class="time-step"><div class="time-badge">05</div><h4>个性化资源学习</h4><p>AI 按需生成知识精讲、视频课件、听学笔记等多形态资源。</p></div>
+                    <div class="time-step"><div class="time-badge">06</div><h4>苏格拉底式 AI 问答</h4><p>启发式追问引导深度思考，支持语音交互多模态实时答疑。</p></div>
+                    <div class="time-step"><div class="time-badge">07</div><h4>艾宾浩斯智能复习</h4><p>遗忘曲线驱动的间隔复习，自动推送薄弱知识点巩固练习。</p></div>
+                    <div class="time-step"><div class="time-badge">08</div><h4>阶段性评估反馈</h4><p>雷达图可视化能力变化，自适应调整后续学习路径与资源。</p></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bottom CTA -->
+    <section class="bottom-banner">
+        <div class="container">
+            <div class="banner-card">
+                <h2>开启你的个性化自适应学习之旅</h2>
+                <p>让多智能体成为你的专属私人教练，携手攻克 C 语言与系统级开发的重重壁垒</p>
+                <div class="banner-btns">
+                    <a href="#" class="btn btn-primary" onclick="openModal(); return false;">立即体验</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <div class="footer-logo"><div class="logo-dot"></div> 师承智导</div>
+                <p style="line-height:1.7; color:#6b7280; max-width: 260px;">AI 辅助自适应学习，让每位代码构建者都能高效、科学地成长。</p>
+            </div>
+            <div class="footer-col">
+                <h4>核心产品</h4>
+                <ul>
+                    <li>AI 智能导学</li>
+                    <li>自适应路径</li>
+                    <li>RAG知识库</li>
+                    <li>多维能力评估</li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>客户支持</h4>
+                <ul>
+                    <li>帮助中心</li>
+                    <li>使用指南</li>
+                    <li>研发意见反馈</li>
+                    <li>联系我们</li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>关于我们</h4>
+                <ul>
+                    <li>团队介绍</li>
+                    <li>隐私政策</li>
+                    <li>服务条款</li>
+                </ul>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            <p>© 2026 师承智导 个性化多智能体学习平台. 保留所有权利。</p>
+        </div>
+    </footer>
+
+    <!-- ===== 登录注册弹窗（原版不动） ===== -->
+    <div id="authModal" class="modal">
+        <div class="modal-overlay" onclick="closeModal()"></div>
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                    <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <div class="modal-tabs">
+                <button class="tab-btn active" data-tab="login" onclick="switchTab('login')">登录</button>
+                <button class="tab-btn" data-tab="register" onclick="switchTab('register')">注册</button>
+            </div>
+            <form id="loginForm" class="auth-form active">
+                <div class="form-group">
+                    <label class="form-label">账号</label>
+                    <input type="text" class="form-input" id="username" placeholder="请输入账号" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">密码</label>
+                    <input type="password" class="form-input" id="password" placeholder="请输入密码" required>
+                </div>
+                <div class="error-message" id="loginError"></div>
+                <button type="submit" class="btn btn-primary btn-full">登录</button>
+                <button type="button" class="demo-btn" onclick="demoLogin()">🎭 演示模式</button>
+            </form>
+            <form id="registerForm" class="auth-form">
+                <div class="form-group">
+                    <label class="form-label">用户名</label>
+                    <input type="text" class="form-input" id="regUsername" placeholder="请输入用户名（至少4位）" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">密码</label>
+                    <input type="password" class="form-input" id="regPassword" placeholder="请输入密码（至少6位）" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">确认密码</label>
+                    <input type="password" class="form-input" id="confirmPassword" placeholder="请再次输入密码" required>
+                </div>
+                <div class="error-message" id="registerError"></div>
+                <button type="submit" class="btn btn-primary btn-full">注册</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 弹窗控制
+        function openModal() { document.getElementById('authModal').classList.add('active'); }
+        function closeModal() { document.getElementById('authModal').classList.remove('active'); }
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+        // Tab切换
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            if (tab === 'login') {
+                document.querySelector('[data-tab="login"]').classList.add('active');
+                document.getElementById('loginForm').classList.add('active');
+            } else {
+                document.querySelector('[data-tab="register"]').classList.add('active');
+                document.getElementById('registerForm').classList.add('active');
+            }
+        }
+
+        // 登录
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorEl = document.getElementById('loginError');
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+                if (data.code === 200) {
+                    const userData = data.data || data;
+                    localStorage.setItem('cryd_token', userData.token || '');
+                    localStorage.setItem('cryd_id', String(userData.id || ''));
+                    localStorage.setItem('cryd_username', userData.username || '');
+                    localStorage.setItem('cryd_nickname', userData.nickname || '');
+                    localStorage.setItem('cryd_role', userData.role || 'student');
+                    localStorage.setItem('cryd_class', userData.className || '');
+                    localStorage.setItem('cryd_studentId', userData.studentId || '');
+                    const role = userData.role || 'student';
+                    localStorage.removeItem('cryd_demo_mode');
+                    window.location.href = role === 'admin' ? '/admin/rag-monitor' : '/student/home';
+                } else {
+                    errorEl.textContent = data.message || '登录失败';
+                    errorEl.classList.add('show');
+                }
+            } catch (error) {
+                errorEl.textContent = '网络错误，请稍后重试';
+                errorEl.classList.add('show');
+            }
+        });
+
+        // 注册
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorEl = document.getElementById('registerError');
+            if (username.length < 4) { errorEl.textContent = '用户名至少4位'; errorEl.classList.add('show'); return; }
+            if (password.length < 6) { errorEl.textContent = '密码至少6位'; errorEl.classList.add('show'); return; }
+            if (password !== confirmPassword) { errorEl.textContent = '两次密码不一致'; errorEl.classList.add('show'); return; }
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    window.location.href = '/student/questionnaire';
+                } else {
+                    errorEl.textContent = data.message || '注册失败';
+                    errorEl.classList.add('show');
+                }
+            } catch (error) {
+                errorEl.textContent = '网络错误，请稍后重试';
+                errorEl.classList.add('show');
+            }
+        });
+
+        // 演示模式 - 使用独立的存储键，不与真实账户冲突
+        function demoLogin() {
+            // 设置演示模式标记
+            localStorage.setItem('cryd_demo_mode', 'true');
+            // 清除演示模式的流程记录（使用demo_前缀）
+            localStorage.removeItem('demo_onboarded');
+            localStorage.removeItem('demo_ability_tested');
+            localStorage.removeItem('demo_completed_practice');
+            localStorage.removeItem('demo_profile');
+            localStorage.removeItem('demo_resources');
+            localStorage.removeItem('demo_practice');
+            localStorage.removeItem('demo_heatmap');
+            localStorage.removeItem('demo_practice_history');
+            localStorage.removeItem('demo_today_recommend_resources');
+            localStorage.removeItem('cryd_pipeline_run_0');
+            window.location.href = '/student/questionnaire?demo=true';
+        }
+    </script>
+
+    <script>
+        // ===== Canvas词云（与Home.vue完全一致，仅尺寸适配） =====
+        (function() {
+            var canvas = document.getElementById('wordcloudCanvas');
+            if (!canvas) return;
+            var wrapper = document.getElementById('wordcloudWrapper');
+            var ctx = canvas.getContext('2d');
+            var dpr = window.devicePixelRatio || 1;
+            var W = 0, H = 0;
+            var nodes = [];
+            var hoveredNode = null;
+            var startTime = Date.now();
+            var mx = -1000, my = -1000;
+
+            // 知识点章节映射
+            var chapterMap = {
+                '基础语法': { chapter: '第1章' },
+                '流程控制': { chapter: '第2章' },
+                '函数': { chapter: '第3章' },
+                '数组与指针': { chapter: '第4-5章' },
+                '结构体': { chapter: '第6章' },
+                '文件操作': { chapter: '第7章' },
+            };
+
+            // 词云数据（与Home.vue一致）
+            var cloudData = [
+                { text: 'C语言', x: 0.5, y: 0.5, fontSize: 36, fontWeight: 'bold', color: '#1f2937', isCenter: true, floatAmplitude: 0, breatheSpeed: 0.3 },
+                // 6个主分类 - 环绕中心均匀分布
+                { text: '基础语法', x: 0.28, y: 0.22, fontSize: 22, fontWeight: 'bold', color: '#6b7280', isMainCategory: true, floatAmplitude: 3, breatheSpeed: 0.28 },
+                { text: '流程控制', x: 0.72, y: 0.22, fontSize: 22, fontWeight: 'bold', color: '#6b7280', isMainCategory: true, floatAmplitude: 3, breatheSpeed: 0.30 },
+                { text: '函数', x: 0.88, y: 0.5, fontSize: 22, fontWeight: 'bold', color: '#6b7280', isMainCategory: true, floatAmplitude: 3, breatheSpeed: 0.32 },
+                { text: '数组与指针', x: 0.12, y: 0.5, fontSize: 22, fontWeight: 'bold', color: '#6b7280', isMainCategory: true, floatAmplitude: 3, breatheSpeed: 0.34 },
+                { text: '结构体', x: 0.72, y: 0.78, fontSize: 22, fontWeight: 'bold', color: '#6b7280', isMainCategory: true, floatAmplitude: 3, breatheSpeed: 0.36 },
+                { text: '文件操作', x: 0.28, y: 0.78, fontSize: 22, fontWeight: 'bold', color: '#6b7280', isMainCategory: true, floatAmplitude: 3, breatheSpeed: 0.38 },
+                // 基础语法子节点（左上区域）
+                { text: '数据类型', x: 0.08, y: 0.1, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.45, info: { name: '数据类型', desc: '整型、浮点型、字符型等基本数据类型', tag: '第1章' } },
+                { text: '变量声明', x: 0.3, y: 0.1, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.48, info: { name: '变量声明', desc: '变量的命名规则、初始化方式和作用域', tag: '第1章' } },
+                { text: '运算符', x: 0.08, y: 0.35, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.42, info: { name: '运算符', desc: '算术、关系、逻辑运算符的使用', tag: '第1章' } },
+                { text: '输入输出', x: 0.18, y: 0.15, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.50, info: { name: '输入输出', desc: 'printf / scanf 格式化输入输出', tag: '第1章' } },
+                { text: '注释', x: 0.06, y: 0.22, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.44, info: { name: '注释', desc: '单行注释和多行注释', tag: '第1章' } },
+                { text: '常量定义', x: 0.32, y: 0.17, fontSize: 12, color: '#b0b8c4', floatAmplitude: 2, breatheSpeed: 0.46, info: { name: '常量定义', desc: '#define 和 const 定义常量', tag: '第1章' } },
+                { text: '类型转换', x: 0.1, y: 0.28, fontSize: 12, color: '#b0b8c4', floatAmplitude: 2, breatheSpeed: 0.43, info: { name: '类型转换', desc: '隐式转换与强制类型转换', tag: '第1章' } },
+                // 流程控制子节点（右上区域）
+                { text: 'if-else', x: 0.65, y: 0.08, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.46, info: { name: 'if-else', desc: '条件判断，程序逻辑的核心', tag: '第2章' } },
+                { text: 'switch', x: 0.88, y: 0.1, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.43, info: { name: 'switch', desc: '多分支选择结构', tag: '第2章' } },
+                { text: 'for循环', x: 0.92, y: 0.3, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.47, info: { name: 'for循环', desc: '已知循环次数时使用', tag: '第2章' } },
+                { text: 'while循环', x: 0.88, y: 0.15, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.41, info: { name: 'while循环', desc: '条件满足时持续循环', tag: '第2章' } },
+                { text: 'break/continue', x: 0.72, y: 0.12, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.49, info: { name: 'break/continue', desc: '循环控制语句', tag: '第2章' } },
+                { text: 'do-while', x: 0.6, y: 0.05, fontSize: 12, color: '#b0b8c4', floatAmplitude: 2, breatheSpeed: 0.44, info: { name: 'do-while', desc: '至少执行一次的循环', tag: '第2章' } },
+                { text: '嵌套循环', x: 0.95, y: 0.22, fontSize: 12, color: '#b0b8c4', floatAmplitude: 2, breatheSpeed: 0.47, info: { name: '嵌套循环', desc: '循环中嵌套循环处理二维数据', tag: '第2章' } },
+                // 函数子节点（右侧区域）
+                { text: '函数定义', x: 0.95, y: 0.42, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.44, info: { name: '函数定义', desc: '函数的声明、定义和调用', tag: '第3章' } },
+                { text: '参数传递', x: 0.95, y: 0.62, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.46, info: { name: '参数传递', desc: '值传递 vs 指针传递', tag: '第3章' } },
+                { text: '递归', x: 0.88, y: 0.68, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.48, info: { name: '递归', desc: '函数调用自身', tag: '第3章' } },
+                { text: '作用域', x: 0.95, y: 0.35, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.43, info: { name: '作用域', desc: '局部 vs 全局变量', tag: '第3章' } },
+                { text: '返回值', x: 0.85, y: 0.45, fontSize: 12, color: '#b0b8c4', floatAmplitude: 2, breatheSpeed: 0.45, info: { name: '返回值', desc: 'return 语句与函数返回类型', tag: '第3章' } },
+                { text: '函数声明', x: 0.92, y: 0.55, fontSize: 12, color: '#b0b8c4', floatAmplitude: 2, breatheSpeed: 0.42, info: { name: '函数声明', desc: '函数原型声明与头文件', tag: '第3章' } },
+                { text: '局部变量', x: 0.82, y: 0.58, fontSize: 12, color: '#b0b8c4', floatAmplitude: 2, breatheSpeed: 0.49, info: { name: '局部变量', desc: '函数内部定义的变量', tag: '第3章' } },
+                { text: '全局变量', x: 0.95, y: 0.72, fontSize: 12, color: '#b0b8c4', floatAmplitude: 2, breatheSpeed: 0.44, info: { name: '全局变量', desc: '所有函数可访问的变量', tag: '第3章' } },
+                // 数组与指针子节点（左下区域）
+                { text: '一维数组', x: 0.05, y: 0.45, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.45, info: { name: '一维数组', desc: '相同类型元素的集合', tag: '第4章' } },
+                { text: '二维数组', x: 0.22, y: 0.65, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.47, info: { name: '二维数组', desc: '矩阵形式的数据结构', tag: '第4章' } },
+                { text: '指针变量', x: 0.08, y: 0.68, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.42, info: { name: '指针变量', desc: '存储内存地址的变量', tag: '第4章' } },
+                { text: '指针运算', x: 0.28, y: 0.48, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.50, info: { name: '指针运算', desc: '指针的算术运算', tag: '第4章' } },
+                { text: '动态内存', x: 0.05, y: 0.78, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.44, info: { name: '动态内存', desc: 'malloc / free 动态内存管理', tag: '第4章' } },
+                { text: '指针与数组', x: 0.22, y: 0.55, fontSize: 12, color: '#b0b8c4', floatAmplitude: 2, breatheSpeed: 0.46, info: { name: '指针与数组', desc: '数组名作为指针使用', tag: '第4章' } },
+                { text: '多级指针', x: 0.12, y: 0.62, fontSize: 12, color: '#b0b8c4', floatAmplitude: 2, breatheSpeed: 0.43, info: { name: '多级指针', desc: '指向指针的指针 **p', tag: '第4章' } },
+                { text: '空指针', x: 0.03, y: 0.58, fontSize: 12, color: '#b0b8c4', floatAmplitude: 2, breatheSpeed: 0.48, info: { name: '空指针', desc: 'NULL 指针的使用与检查', tag: '第4章' } },
+                { text: '野指针', x: 0.15, y: 0.72, fontSize: 12, color: '#b0b8c4', floatAmplitude: 2, breatheSpeed: 0.41, info: { name: '野指针', desc: '未初始化的危险指针', tag: '第4章' } },
+                { text: '数组遍历', x: 0.28, y: 0.72, fontSize: 12, color: '#b0b8c4', floatAmplitude: 2, breatheSpeed: 0.47, info: { name: '数组遍历', desc: '用循环访问数组每个元素', tag: '第4章' } },
+                // 结构体子节点（右下区域）
+                { text: '结构体定义', x: 0.65, y: 0.85, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.46, info: { name: '结构体定义', desc: '自定义数据类型', tag: '第5章' } },
+                { text: '结构体指针', x: 0.88, y: 0.88, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.48, info: { name: '结构体指针', desc: '指向结构体的指针', tag: '第5章' } },
+                { text: '链表', x: 0.75, y: 0.92, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.41, info: { name: '链表', desc: '动态数据结构', tag: '第5章' } },
+                { text: '共用体', x: 0.62, y: 0.92, fontSize: 12, color: '#b0b8c4', floatAmplitude: 2, breatheSpeed: 0.45, info: { name: '共用体', desc: 'union 共享内存空间', tag: '第5章' } },
+                { text: '枚举类型', x: 0.7, y: 0.75, fontSize: 12, color: '#b0b8c4', floatAmplitude: 2, breatheSpeed: 0.43, info: { name: '枚举类型', desc: 'enum 定义命名常量集合', tag: '第5章' } },
+                { text: 'typedef', x: 0.58, y: 0.82, fontSize: 12, color: '#b0b8c4', floatAmplitude: 2, breatheSpeed: 0.49, info: { name: 'typedef', desc: '为类型创建别名', tag: '第5章' } },
+                { text: '结构体数组', x: 0.85, y: 0.82, fontSize: 12, color: '#b0b8c4', floatAmplitude: 2, breatheSpeed: 0.44, info: { name: '结构体数组', desc: '存储多个结构体实例', tag: '第5章' } },
+                // 文件操作子节点（底部中间偏左）
+                { text: 'fopen/fclose', x: 0.15, y: 0.88, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.46, info: { name: 'fopen/fclose', desc: '文件的打开与关闭', tag: '第7章' } },
+                { text: 'fread/fwrite', x: 0.35, y: 0.72, fontSize: 13, color: '#94a3b8', floatAmplitude: 2, breatheSpeed: 0.48, info: { name: 'fread/fwrite', desc: '二进制文件读写', tag: '第7章' } },
+                { text: 'fprintf/fscanf', x: 0.25, y: 0.92, fontSize: 12, color: '#b0b8c4', floatAmplitude: 2, breatheSpeed: 0.44, info: { name: 'fprintf/fscanf', desc: '文本文件格式化读写', tag: '第7章' } },
+                { text: 'fgets/fputs', x: 0.38, y: 0.85, fontSize: 12, color: '#b0b8c4', floatAmplitude: 2, breatheSpeed: 0.47, info: { name: 'fgets/fputs', desc: '字符串文件读写', tag: '第7章' } },
+                { text: '文件定位', x: 0.1, y: 0.82, fontSize: 12, color: '#b0b8c4', floatAmplitude: 2, breatheSpeed: 0.42, info: { name: '文件定位', desc: 'fseek / ftell 文件指针操作', tag: '第7章' } },
+                { text: '错误处理', x: 0.32, y: 0.92, fontSize: 12, color: '#b0b8c4', floatAmplitude: 2, breatheSpeed: 0.50, info: { name: '错误处理', desc: 'ferror / feof 文件状态检查', tag: '第7章' } },
+            ];
+
+            // WordNode类（与Home.vue一致）
+            function WordNode(data) {
+                this.text = data.text;
+                this.baseX = data.x; this.baseY = data.y;
+                this.x = data.x; this.y = data.y;
+                this.fontSize = data.fontSize;
+                this.fontWeight = data.fontWeight || 'normal';
+                this.color = data.color || '#888';
+                this.isCenter = data.isCenter || false;
+                this.isMainCategory = data.isMainCategory || false;
+                this.info = data.info || null;
+                this.floatAmplitude = data.floatAmplitude || 5;
+                this.breatheSpeed = data.breatheSpeed || 0.5;
+                this.breatheOffset = Math.random() * Math.PI * 2;
+                this.floatOffsetX = Math.random() * Math.PI * 2;
+                this.floatOffsetY = Math.random() * Math.PI * 2;
+                this.isHovered = false; this.hoverScale = 1; this.currentScale = 1;
+                this.drawX = 0; this.drawY = 0; this.width = 0; this.height = 0;
+            }
+            WordNode.prototype.update = function(time) {
+                var breathe = Math.sin(time * this.breatheSpeed + this.breatheOffset) * 0.02;
+                this.currentScale = 1 + breathe;
+                if (!this.isCenter && this.floatAmplitude > 0) {
+                    var amp = this.isMainCategory ? this.floatAmplitude * 0.6 : this.floatAmplitude;
+                    this.x = this.baseX + Math.sin(time * 0.4 + this.floatOffsetX) * amp / 100;
+                    this.y = this.baseY + Math.cos(time * 0.4 + this.floatOffsetY) * amp / 100;
+                }
+                this.hoverScale = this.isHovered ? Math.min(this.hoverScale + 0.05, 1.15) : Math.max(this.hoverScale - 0.05, 1);
+            };
+            WordNode.prototype.draw = function(ctx, w, h) {
+                var x = this.x * w, y = this.y * h;
+                var fs = this.fontSize * this.currentScale * this.hoverScale;
+                ctx.save();
+                var fw = this.fontWeight, c = this.color;
+                if (this.isHovered && !this.isCenter) { fw = 'bold'; c = '#1f2937'; }
+                ctx.font = fw + ' ' + fs + 'px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
+                ctx.fillStyle = c; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                if (this.isHovered) { ctx.shadowColor = 'rgba(0,0,0,0.1)'; ctx.shadowBlur = 8; }
+                ctx.fillText(this.text, x, y); ctx.restore();
+                var m = ctx.measureText(this.text);
+                this.width = m.width; this.height = fs;
+                this.drawX = x - m.width / 2; this.drawY = y - fs / 2;
+            };
+            WordNode.prototype.hitTest = function(mx, my) {
+                if (this.isCenter || this.isMainCategory || !this.info) return false;
+                return mx >= this.drawX - 8 && mx <= this.drawX + this.width + 8 && my >= this.drawY - 4 && my <= this.drawY + this.height + 4;
+            };
+
+            // 绘制连接线
+            function drawConnections() {
+                var center = nodes.find(function(n) { return n.isCenter; });
+                if (!center) return;
+                ctx.save();
+                var mainCats = nodes.filter(function(n) { return n.isMainCategory; });
+                mainCats.forEach(function(cat) {
+                    ctx.beginPath();
+                    ctx.moveTo(center.x * W, center.y * H);
+                    ctx.lineTo(cat.x * W, cat.y * H);
+                    ctx.strokeStyle = 'rgba(107,114,128,0.35)';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                    // 子节点连接线
+                    nodes.filter(function(n) { return !n.isCenter && !n.isMainCategory && n.info; }).forEach(function(child) {
+                        var d = Math.sqrt(Math.pow(child.baseX - cat.baseX, 2) + Math.pow(child.baseY - cat.baseY, 2));
+                        if (d < 0.3) {
+                            ctx.beginPath();
+                            ctx.moveTo(cat.x * W, cat.y * H);
+                            ctx.lineTo(child.x * W, child.y * H);
+                            ctx.strokeStyle = 'rgba(107,114,128,0.2)';
+                            ctx.lineWidth = 0.8;
+                            ctx.stroke();
+                        }
+                    });
+                });
+                ctx.restore();
+            }
+
+            // 动画循环
+            function animate() {
+                if (!ctx || !canvas) return;
+                var time = (Date.now() - startTime) / 1000;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.save(); ctx.scale(dpr, dpr);
+                drawConnections();
+                ctx.restore();
+                var newHovered = null;
+                nodes.forEach(function(node) {
+                    node.update(time);
+                    ctx.save(); ctx.scale(dpr, dpr);
+                    node.draw(ctx, W, H);
+                    ctx.restore();
+                    if (node.hitTest(mx, my)) newHovered = node;
+                });
+                if (hoveredNode !== newHovered) {
+                    if (hoveredNode) hoveredNode.isHovered = false;
+                    if (newHovered && newHovered.info) { newHovered.isHovered = true; hoveredNode = newHovered; }
+                    else { hoveredNode = null; }
+                }
+                if (hoveredNode && hoveredNode.info) {
+                    var card = document.getElementById('knowledgeCard');
+                    document.getElementById('cardIcon').textContent = '📖';
+                    document.getElementById('cardName').textContent = hoveredNode.info.name;
+                    document.getElementById('cardDesc').textContent = hoveredNode.info.desc;
+                    document.getElementById('cardTag').textContent = hoveredNode.info.tag;
+                    var rect = canvas.getBoundingClientRect();
+                    var cardX = mx + 20, cardY = my - 30;
+                    if (cardX + 280 > rect.width) cardX = mx - 290;
+                    if (cardY < 0) cardY = 10;
+                    card.style.left = (rect.left + cardX) + 'px';
+                    card.style.top = (rect.top + cardY) + 'px';
+                    card.classList.add('visible');
+                } else {
+                    document.getElementById('knowledgeCard').classList.remove('visible');
+                }
+                requestAnimationFrame(animate);
+            }
+
+            // 初始化
+            function init() {
+                W = wrapper.offsetWidth; H = wrapper.offsetHeight;
+                if (W === 0 || H === 0) return;
+                canvas.width = W * dpr; canvas.height = H * dpr;
+                canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+                nodes = cloudData.map(function(d) { return new WordNode(d); });
+                canvas.addEventListener('mousemove', function(e) {
+                    var rect = canvas.getBoundingClientRect();
+                    mx = e.clientX - rect.left; my = e.clientY - rect.top;
+                });
+                canvas.addEventListener('mouseleave', function() {
+                    mx = -1000; my = -1000;
+                    if (hoveredNode) hoveredNode.isHovered = false;
+                    hoveredNode = null;
+                });
+                animate();
+            }
+
+            window.addEventListener('load', function() { setTimeout(init, 100); });
+            window.addEventListener('resize', function() {
+                W = wrapper.offsetWidth; H = wrapper.offsetHeight;
+                canvas.width = W * dpr; canvas.height = H * dpr;
+                canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+            });
+        })();
+    </script>
+</body>
+</html>
